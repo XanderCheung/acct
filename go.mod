@@ -1,4 +1,4 @@
-module github.com/XanderCheung/account-service-go
+module github.com/xandercheung/account-service-go
 
 go 1.14
 
