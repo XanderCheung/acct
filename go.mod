@@ -1,4 +1,4 @@
-module github.com/xandercheung/account-service-go
+module github.com/xandercheung/acct
 
 go 1.14
 

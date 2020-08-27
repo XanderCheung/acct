@@ -1,2 +1,2 @@
-# account-service-go
+# acct
 Service interface for user authentication
