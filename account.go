@@ -9,14 +9,14 @@ import (
 )
 
 type Account struct {
-	ID        uint `gorm:"primary_key"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
-	Email     string `gorm:"type:varchar(100);unique_index;not null"`
-	Username  string `gorm:"type:varchar(100);unique_index;not null"`
-	Password  string `gorm:"column:encrypted_password;not null" json:"-"`
-	Token     string `gorm:"-"`
+	ID        uint       `gorm:"primary_key" json:"id"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"-"`
+	Email     string     `gorm:"type:varchar(100);unique_index;not null" json:"email"`
+	Username  string     `gorm:"type:varchar(100);unique_index;not null" json:"username"`
+	Password  string     `gorm:"column:encrypted_password;not null" json:"-"`
+	Token     string     `gorm:"-" json:"token"`
 }
 
 var accountLock = sync.RWMutex{}
@@ -69,4 +69,15 @@ func (c *Account) Validate() (isValid bool, err error) {
 	}
 
 	return true, nil
+}
+
+func (c *Account) GenerateToken() error {
+	token, err := GenerateToken(c)
+	if err != nil {
+		return err
+	}
+
+	c.Token = token
+
+	return nil
 }
