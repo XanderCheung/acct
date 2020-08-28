@@ -5,14 +5,18 @@ import (
 	"github.com/jinzhu/gorm"
 	"strings"
 	"sync"
+	"time"
 )
 
 type Account struct {
-	gorm.Model
-	Email    string `gorm:"type:varchar(100);unique_index"json:"email"`
-	Username string `gorm:"type:varchar(100);unique_index"json:"username"`
-	Password string `gorm:"column:encrypted_password" json:"-"`
-	Token    string `gorm:"-" json:"token"`
+	ID        uint `gorm:"primary_key"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
+	Email     string `gorm:"type:varchar(100);unique_index;not null"`
+	Username  string `gorm:"type:varchar(100);unique_index;not null"`
+	Password  string `gorm:"column:encrypted_password;not null" json:"-"`
+	Token     string `gorm:"-"`
 }
 
 var accountLock = sync.RWMutex{}

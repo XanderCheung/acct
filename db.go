@@ -3,7 +3,6 @@ package acct
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"time"
 )
 
@@ -28,15 +27,4 @@ func InitDBConnection(dialect string, args ...interface{}) (db *gorm.DB, err err
 	DB = db
 
 	return
-}
-
-func MigrateTables() {
-	DB.Set("gorm:table_options", "CHARSET=utf8mb4").Debug().AutoMigrate(
-		&Account{},
-	)
-}
-
-func DBSeed() {
-	account := Account{Email: "admin@qq.com", Username: "admin", Password: "admin@123456"}
-	_ = account.Create()
 }
