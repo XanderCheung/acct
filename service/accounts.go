@@ -14,8 +14,8 @@ func fetchAccounts(c *gin.Context) {
 
 	queryConditions := utils.StringToMap(c.Query("q"))
 	if len(queryConditions) > 0 {
-		if name, ok := queryConditions["name"].(string); ok {
-			relation = relation.Where("name LIKE ?", "%"+name+"%")
+		if username, ok := queryConditions["username"].(string); ok {
+			relation = relation.Where("username LIKE ?", "%"+username+"%")
 		}
 
 		if email, ok := queryConditions["email"].(string); ok {
@@ -76,7 +76,7 @@ func updateAccount(c *gin.Context) {
 		return
 	}
 
-	if err := acct.DB.Model(&account).Updates(acct.Account{
+	if err := acct.DB.Debug().Model(&account).Updates(acct.Account{
 		Email:    temp.Email,
 		Username: temp.Username,
 		Password: temp.Password,

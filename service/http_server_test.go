@@ -15,6 +15,8 @@ func TestRunHttpServer(t *testing.T) {
 		t.Error("connect mysql error: ", err)
 	}
 
+	acct.DB.DropTableIfExists(&acct.Account{})
+	acct.MigrateTables()
 	acct.DBSeed()
 
 	// 设置日志文件

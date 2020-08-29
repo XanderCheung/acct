@@ -21,12 +21,32 @@ type Account struct {
 
 var accountLock = sync.RWMutex{}
 
-func (c *Account) Create() error {
-	accountLock.Lock()
-	defer accountLock.Unlock()
-
-	if isValid, err := c.Validate(); !isValid {
+func (c *Account) BeforeCreate(tx *gorm.DB) (err error) {
+	if err = c.Validate(); err != nil {
 		return err
+	}
+
+	if err = c.encryptPassword(); err != nil {
+		return err
+	}
+
+	return
+}
+
+func (c *Account) BeforeUpdate(tx *gorm.DB) (err error) {
+	if err = c.Validate(); err != nil {
+		return err
+	}
+
+	if err = c.encryptPassword(); err != nil {
+		return err
+	}
+	return
+}
+
+func (c *Account) encryptPassword() (err error) {
+	if c.Password == "" {
+		return nil
 	}
 
 	hashPassword, err := passwordToBcryptHash(c.Password)
@@ -35,9 +55,20 @@ func (c *Account) Create() error {
 	}
 
 	c.Password = hashPassword
+	return
+}
 
-	err = DB.Create(&c).Error
-	if err != nil {
+func IsAccountExists(query, notQuery map[string]interface{}) bool {
+	account := Account{}
+	DB.Model(&Account{}).Where(query).Not(notQuery).Limit(1).Find(&account)
+	return account.ID > 0
+}
+
+func (c *Account) Create() error {
+	accountLock.Lock()
+	defer accountLock.Unlock()
+
+	if err := DB.Create(&c).Error; err != nil {
 		return err
 	}
 
@@ -48,38 +79,24 @@ func (c *Account) Create() error {
 	return nil
 }
 
-func (c *Account) Validate() (isValid bool, err error) {
+func (c *Account) Validate() error {
 	if !strings.Contains(c.Email, "@") {
-		return false, errors.New("email address is required")
+		return errors.New("email address is required")
 	}
 
 	if len(c.Password) < 6 {
-		return false, errors.New("password is to short")
+		return errors.New("password is to short")
 	}
 
-	temp := Account{}
-	err = DB.Model(&Account{}).Where("email = ?", c.Email).First(&temp).Error
-
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return false, errors.New("connection error. please retry")
+	if IsAccountExists(map[string]interface{}{"email": c.Email}, map[string]interface{}{"id": c.ID}) {
+		return errors.New("email address already in use")
 	}
 
-	if temp.ID > 0 {
-		return false, errors.New("email address already in use")
+	if IsAccountExists(map[string]interface{}{"username": c.Username}, map[string]interface{}{"id": c.ID}) {
+		return errors.New("username already in use")
 	}
 
-	temp = Account{}
-	err = DB.Model(&Account{}).Where("username = ?", c.Username).First(&temp).Error
-
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return false, errors.New("connection error. please retry")
-	}
-
-	if temp.ID > 0 {
-		return false, errors.New("username already in use")
-	}
-
-	return true, nil
+	return nil
 }
 
 func (c *Account) GenerateToken() error {
