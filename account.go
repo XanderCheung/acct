@@ -64,8 +64,19 @@ func (c *Account) Validate() (isValid bool, err error) {
 		return false, errors.New("connection error. please retry")
 	}
 
-	if temp.Email != "" {
+	if temp.ID > 0 {
 		return false, errors.New("email address already in use")
+	}
+
+	temp = Account{}
+	err = DB.Model(&Account{}).Where("username = ?", c.Username).First(&temp).Error
+
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return false, errors.New("connection error. please retry")
+	}
+
+	if temp.ID > 0 {
+		return false, errors.New("username already in use")
 	}
 
 	return true, nil

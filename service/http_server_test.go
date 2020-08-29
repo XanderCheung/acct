@@ -22,7 +22,6 @@ func TestRunHttpServer(t *testing.T) {
 	gin.DefaultWriter = io.MultiWriter(f)
 
 	router := gin.Default()
-	//router.Use(TokenAuthMiddleware())
 	SetAcctV1Router(router)
 
 	_ = router.Run(":2337")
