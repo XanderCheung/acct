@@ -1,10 +1,11 @@
-package service
+package api
 
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/xandercheung/acct"
+	"github.com/xandercheung/acct/utils"
 	"github.com/xandercheung/ogs-go"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,7 +18,7 @@ type tempAccount struct {
 
 func signIn(c *gin.Context) {
 	temp := tempAccount{}
-	if err := json.NewDecoder(c.Request.Body).Decode(&temp); err != nil || IsEmpty(temp.Email) && IsEmpty(temp.Username) {
+	if err := json.NewDecoder(c.Request.Body).Decode(&temp); err != nil || utils.IsEmpty(temp.Email) && utils.IsEmpty(temp.Username) {
 		JSON(c, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage("Invalid Request")))
 		return
 	}

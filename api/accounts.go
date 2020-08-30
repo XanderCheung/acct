@@ -1,4 +1,4 @@
-package service
+package api
 
 import (
 	"encoding/json"
@@ -32,7 +32,7 @@ func fetchAccounts(c *gin.Context) {
 func fetchAccount(c *gin.Context) {
 	id := c.Param("id")
 	account := acct.Account{}
-	if IsEmpty(id) || acct.DB.Limit(1).Find(&account, c.Param("id")).RecordNotFound() {
+	if utils.IsEmpty(id) || acct.DB.Limit(1).Find(&account, c.Param("id")).RecordNotFound() {
 		JSON(c, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("Account Not Found")))
 		return
 	}
@@ -65,7 +65,7 @@ func createAccount(c *gin.Context) {
 func updateAccount(c *gin.Context) {
 	id := c.Param("id")
 	account := acct.Account{}
-	if IsEmpty(id) || acct.DB.Limit(1).Find(&account, c.Param("id")).RecordNotFound() {
+	if utils.IsEmpty(id) || acct.DB.Limit(1).Find(&account, c.Param("id")).RecordNotFound() {
 		JSON(c, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("Account Not Found")))
 		return
 	}
@@ -76,7 +76,7 @@ func updateAccount(c *gin.Context) {
 		return
 	}
 
-	if err := acct.DB.Debug().Model(&account).Updates(acct.Account{
+	if err := acct.DB.Model(&account).Updates(acct.Account{
 		Email:    temp.Email,
 		Username: temp.Username,
 		Password: temp.Password,
@@ -90,7 +90,7 @@ func updateAccount(c *gin.Context) {
 func destroyAccount(c *gin.Context) {
 	id := c.Param("id")
 	account := acct.Account{}
-	if IsEmpty(id) || acct.DB.Limit(1).Find(&account, c.Param("id")).RecordNotFound() {
+	if utils.IsEmpty(id) || acct.DB.Limit(1).Find(&account, c.Param("id")).RecordNotFound() {
 		JSON(c, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("Account Not Found")))
 		return
 	}

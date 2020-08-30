@@ -2,6 +2,7 @@ package acct
 
 import (
 	"errors"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"strings"
 	"sync"
@@ -45,9 +46,9 @@ func (c *Account) encryptPassword(scope *gorm.Scope) (err error) {
 	return scope.SetColumn("encrypted_password", hashedPassword)
 }
 
-func IsAccountExists(query, notQuery map[string]interface{}) bool {
+func IsAccountWithDeletedExists(query, notQuery map[string]interface{}) bool {
 	account := Account{}
-	DB.Model(&Account{}).Where(query).Not(notQuery).Limit(1).Find(&account)
+	DB.Unscoped().Model(&Account{}).Where(query).Not(notQuery).Limit(1).Find(&account)
 	return account.ID > 0
 }
 
@@ -75,11 +76,11 @@ func (c *Account) Validate() error {
 		return errors.New("password is to short")
 	}
 
-	if IsAccountExists(map[string]interface{}{"email": c.Email}, map[string]interface{}{"id": c.ID}) {
+	if IsAccountWithDeletedExists(map[string]interface{}{"email": c.Email}, map[string]interface{}{"id": c.ID}) {
 		return errors.New("email address already in use")
 	}
 
-	if IsAccountExists(map[string]interface{}{"username": c.Username}, map[string]interface{}{"id": c.ID}) {
+	if IsAccountWithDeletedExists(map[string]interface{}{"username": c.Username}, map[string]interface{}{"id": c.ID}) {
 		return errors.New("username already in use")
 	}
 
@@ -87,12 +88,17 @@ func (c *Account) Validate() error {
 }
 
 func (c *Account) GenerateToken() error {
-	token, err := GenerateToken(c)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"username": c.Username,
+		"exp":      time.Now().Add(time.Hour * 72).Unix(),
+	})
+
+	signedStr, err := token.SignedString([]byte(getTokenKey()))
 	if err != nil {
 		return err
 	}
 
-	c.Token = token
+	c.Token = signedStr
 
 	return nil
 }

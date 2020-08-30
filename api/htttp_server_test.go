@@ -1,14 +1,12 @@
-package service
+package api
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/xandercheung/acct"
-	"io"
-	"os"
 	"testing"
 )
 
-func TestRunHttpServer(t *testing.T) {
+func TestHttpServer(t *testing.T) {
 	mysqlConnectArgs := "root:@tcp(127.0.0.1:3306)/acct_test?&charset=utf8mb4&parseTime=True&loc=UTC"
 	mysqlConnection, err := acct.InitDBConnection("mysql", mysqlConnectArgs)
 	if err != nil || mysqlConnection == nil {
@@ -19,12 +17,11 @@ func TestRunHttpServer(t *testing.T) {
 	acct.MigrateTables()
 	acct.DBSeed()
 
-	// 设置日志文件
-	f, _ := os.OpenFile("log/acct-http.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-	gin.DefaultWriter = io.MultiWriter(f)
-
 	router := gin.Default()
-	SetAcctV1Router(router)
+	SetAcctRouter(router)
 
-	_ = router.Run(":2337")
+	err = router.Run(":2337")
+	if err != nil {
+		t.Error("run http server error: ", err)
+	}
 }

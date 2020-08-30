@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"strings"
 )
 
 func StringToMap(s string) (stringMap map[string]interface{}) {
@@ -14,4 +15,8 @@ func StringToMap(s string) (stringMap map[string]interface{}) {
 	}
 
 	return stringMap
+}
+
+func IsEmpty(s string) bool {
+	return len(strings.TrimSpace(s)) == 0
 }

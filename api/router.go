@@ -1,18 +1,18 @@
-package service
+package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/xandercheung/acct/utils"
+	"github.com/xandercheung/acct"
 )
 
-func SetAcctV1Router(router *gin.Engine) {
+func SetAcctRouter(router *gin.Engine) {
 	r := router.Group("/api/v1")
 	{
 		r.POST("/sign_in", signIn)
 		r.POST("/sign_up", signUp)
 
 		// Token Authentication
-		r.Use(utils.TokenAuthMiddleware())
+		r.Use(acct.TokenAuthMiddleware())
 
 		accounts := r.Group("/accounts")
 		{

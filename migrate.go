@@ -7,7 +7,7 @@ func MigrateTables() {
 }
 
 func DBSeed() {
-	if !IsAccountExists(map[string]interface{}{"username": "admin"}, nil) {
+	if !IsAccountWithDeletedExists(map[string]interface{}{"username": "admin"}, nil) {
 		account := Account{Email: "admin@qq.com", Username: "admin", Password: "admin@123456"}
 		_ = account.Create()
 	}
