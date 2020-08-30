@@ -14,7 +14,7 @@ func Paginate(db *gorm.DB, page, perPage int) (*gorm.DB, ogs.BasePaginate) {
 		page = 1
 	}
 
-	if perPage == 0 {
+	if perPage <= 0 {
 		perPage = defaultPerPage
 	}
 
@@ -28,7 +28,7 @@ func Paginate(db *gorm.DB, page, perPage int) (*gorm.DB, ogs.BasePaginate) {
 }
 
 func PaginateGin(db *gorm.DB, c *gin.Context) (*gorm.DB, ogs.BasePaginate) {
-	page, _ := strconv.ParseInt(c.Query("page"), 10, 64)
-	perPage, _ := strconv.ParseInt(c.Query("per_page"), 10, 64)
-	return Paginate(db, int(page), int(perPage))
+	page, _ := strconv.Atoi(c.Query("page"))
+	perPage, _ := strconv.Atoi(c.Query("per_page"))
+	return Paginate(db, page, perPage)
 }
