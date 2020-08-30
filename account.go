@@ -21,41 +21,28 @@ type Account struct {
 
 var accountLock = sync.RWMutex{}
 
-func (c *Account) BeforeCreate(tx *gorm.DB) (err error) {
+func (c *Account) BeforeSave(scope *gorm.Scope) (err error) {
 	if err = c.Validate(); err != nil {
 		return err
 	}
 
-	if err = c.encryptPassword(); err != nil {
-		return err
-	}
-
-	return
-}
-
-func (c *Account) BeforeUpdate(tx *gorm.DB) (err error) {
-	if err = c.Validate(); err != nil {
-		return err
-	}
-
-	if err = c.encryptPassword(); err != nil {
+	if err = c.encryptPassword(scope); err != nil {
 		return err
 	}
 	return
 }
 
-func (c *Account) encryptPassword() (err error) {
+func (c *Account) encryptPassword(scope *gorm.Scope) (err error) {
 	if c.Password == "" {
 		return nil
 	}
 
-	hashPassword, err := passwordToBcryptHash(c.Password)
+	hashedPassword, err := passwordToBcryptHash(c.Password)
 	if err != nil {
 		return err
 	}
 
-	c.Password = hashPassword
-	return
+	return scope.SetColumn("encrypted_password", hashedPassword)
 }
 
 func IsAccountExists(query, notQuery map[string]interface{}) bool {
