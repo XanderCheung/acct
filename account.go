@@ -3,7 +3,7 @@ package acct
 import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"strings"
 	"sync"
 	"time"
@@ -22,28 +22,25 @@ type Account struct {
 
 var accountLock = sync.RWMutex{}
 
-func (c *Account) BeforeSave(scope *gorm.Scope) (err error) {
+func (c *Account) BeforeSave(tx *gorm.DB) (err error) {
 	if err = c.Validate(); err != nil {
 		return err
 	}
 
-	if err = c.encryptPassword(scope); err != nil {
+	if err = c.encryptPassword(tx); err != nil {
 		return err
 	}
 	return
 }
 
-func (c *Account) encryptPassword(scope *gorm.Scope) (err error) {
-	if c.Password == "" {
-		return nil
-	}
-
+func (c Account) encryptPassword(tx *gorm.DB) (err error) {
 	hashedPassword, err := passwordToBcryptHash(c.Password)
 	if err != nil {
 		return err
 	}
 
-	return scope.SetColumn("encrypted_password", hashedPassword)
+	tx.Statement.SetColumn("encrypted_password", hashedPassword)
+	return nil
 }
 
 func IsAccountWithDeletedExists(query, notQuery map[string]interface{}) bool {

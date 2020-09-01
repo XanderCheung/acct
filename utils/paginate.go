@@ -2,8 +2,8 @@ package utils
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/xandercheung/ogs-go"
+	"gorm.io/gorm"
 	"strconv"
 )
 
@@ -18,13 +18,13 @@ func Paginate(db *gorm.DB, page, perPage int) (*gorm.DB, ogs.BasePaginate) {
 		perPage = defaultPerPage
 	}
 
-	totalCount := 0
+	var totalCount int64 = 0
 	db.Count(&totalCount)
 
 	offset := perPage * (page - 1)
 	db = db.Limit(perPage).Offset(offset)
 
-	return db, ogs.NewPaginate(page, totalCount, perPage)
+	return db, ogs.NewPaginate(page, int(totalCount), perPage)
 }
 
 func PaginateGin(db *gorm.DB, c *gin.Context) (*gorm.DB, ogs.BasePaginate) {

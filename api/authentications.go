@@ -3,11 +3,11 @@ package api
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/xandercheung/acct"
 	"github.com/xandercheung/acct/utils"
 	"github.com/xandercheung/ogs-go"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type tempAccount struct {

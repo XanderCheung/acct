@@ -6,6 +6,8 @@ import (
 	"github.com/xandercheung/acct"
 	"github.com/xandercheung/acct/utils"
 	"github.com/xandercheung/ogs-go"
+	"gorm.io/gorm"
+	"strconv"
 )
 
 func fetchAccounts(c *gin.Context) {
@@ -30,10 +32,8 @@ func fetchAccounts(c *gin.Context) {
 }
 
 func fetchAccount(c *gin.Context) {
-	id := c.Param("id")
-	account := acct.Account{}
-	if utils.IsEmpty(id) || acct.DB.Limit(1).Find(&account, c.Param("id")).RecordNotFound() {
-		JSON(c, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("Account Not Found")))
+	account, err := loadAccount(c)
+	if err != nil {
 		return
 	}
 
@@ -63,20 +63,18 @@ func createAccount(c *gin.Context) {
 }
 
 func updateAccount(c *gin.Context) {
-	id := c.Param("id")
-	account := acct.Account{}
-	if utils.IsEmpty(id) || acct.DB.Limit(1).Find(&account, c.Param("id")).RecordNotFound() {
-		JSON(c, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("Account Not Found")))
+	account, err := loadAccount(c)
+	if err != nil {
 		return
 	}
 
 	temp := tempAccount{}
-	if err := json.NewDecoder(c.Request.Body).Decode(&temp); err != nil {
+	if err = json.NewDecoder(c.Request.Body).Decode(&temp); err != nil {
 		JSON(c, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage("Invalid Request")))
 		return
 	}
 
-	if err := acct.DB.Model(&account).Updates(acct.Account{
+	if err = acct.DB.Model(&account).Updates(acct.Account{
 		Email:    temp.Email,
 		Username: temp.Username,
 		Password: temp.Password,
@@ -88,16 +86,30 @@ func updateAccount(c *gin.Context) {
 }
 
 func destroyAccount(c *gin.Context) {
-	id := c.Param("id")
-	account := acct.Account{}
-	if utils.IsEmpty(id) || acct.DB.Limit(1).Find(&account, c.Param("id")).RecordNotFound() {
-		JSON(c, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("Account Not Found")))
+	account, err := loadAccount(c)
+	if err != nil {
 		return
 	}
 
-	if err := acct.DB.Delete(&account).Error; err != nil {
+	if err = acct.DB.Delete(&account).Error; err != nil {
 		JSON(c, ogs.RspBase(ogs.StatusDestroyFailed, ogs.ErrorMessage("Destroy Failed")))
 	} else {
 		JSON(c, ogs.RspOK(ogs.SuccessMessage("Destroy Successfully")))
 	}
+}
+
+func loadAccount(c *gin.Context) (account acct.Account, err error) {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	if err = acct.DB.Limit(1).Find(&account, id).Error; err != nil {
+		JSON(c, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage(err.Error())))
+		return account, err
+	}
+
+	if account.ID == 0 {
+		JSON(c, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("Account Not Found")))
+		return account, gorm.ErrRecordNotFound
+	}
+
+	return account, nil
 }

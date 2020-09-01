@@ -10,7 +10,8 @@ func main() {
 	utils.InitEnv()
 
 	connectArgs := acct.GetMysqlConnectArgsFromEnv()
-	_, err := acct.InitDBConnection("mysql", connectArgs)
+	err := acct.InitDBConnection(connectArgs)
+
 	if err != nil {
 		panic(err)
 	}
