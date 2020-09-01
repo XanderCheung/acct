@@ -18,3 +18,5 @@
 .env
 
 log/*.log
+
+acct

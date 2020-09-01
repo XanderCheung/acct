@@ -68,17 +68,15 @@ func updateAccount(c *gin.Context) {
 		return
 	}
 
-	temp := tempAccount{}
-	if err = json.NewDecoder(c.Request.Body).Decode(&temp); err != nil {
+	params, err := utils.RequestBodyParams(c)
+	if err != nil {
 		JSON(c, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage("Invalid Request")))
 		return
 	}
 
-	if err = acct.DB.Model(&account).Updates(acct.Account{
-		Email:    temp.Email,
-		Username: temp.Username,
-		Password: temp.Password,
-	}).Error; err != nil {
+	if err = acct.DB.Debug().Model(&account).
+		Select(permittedAccountParams(params)).
+		Updates(params).Error; err != nil {
 		JSON(c, ogs.RspBase(ogs.StatusUpdateFailed, ogs.ErrorMessage(err.Error())))
 	} else {
 		JSON(c, ogs.RspOK(ogs.SuccessMessage("Update Successfully")))
@@ -96,6 +94,16 @@ func destroyAccount(c *gin.Context) {
 	} else {
 		JSON(c, ogs.RspOK(ogs.SuccessMessage("Destroy Successfully")))
 	}
+}
+
+func permittedAccountParams(params map[string]interface{}) []string {
+	permitted := []string{"Email", "Username"}
+
+	if password, ok := params["password"].(string); ok && !utils.IsEmpty(password) {
+		permitted = append(permitted, "Password")
+	}
+
+	return permitted
 }
 
 func loadAccount(c *gin.Context) (account acct.Account, err error) {

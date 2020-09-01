@@ -7,10 +7,10 @@ import (
 func TestMigrateTables(t *testing.T) {
 	TestInitDBConnection(t)
 
-	DB.DropTableIfExists(&Account{})
+	_ = DB.Migrator().DropTable(&Account{})
 	MigrateTables()
 
-	if !DB.HasTable(&Account{}) {
+	if !DB.Migrator().HasTable(&Account{}) {
 		t.Error("migrate mysql tables error")
 	}
 }
