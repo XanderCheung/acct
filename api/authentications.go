@@ -7,7 +7,6 @@ import (
 	"github.com/xandercheung/acct/utils"
 	"github.com/xandercheung/ogs-go"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type tempAccount struct {
@@ -25,15 +24,10 @@ func signIn(c *gin.Context) {
 
 	// Find user
 	account := acct.Account{}
-	if err := acct.DB.Where(&acct.Account{Email: temp.Email, Username: temp.Username}).
-		Limit(1).Find(&account).Error; err != nil {
+	acct.DB.Where(&acct.Account{Email: temp.Email, Username: temp.Username}).Take(&account)
 
-		if err == gorm.ErrRecordNotFound {
-			JSON(c, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("User Not Found")))
-			return
-		}
-
-		JSON(c, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage("Connection Error. Please Retry")))
+	if !account.IsPersisted() {
+		JSON(c, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("User Not Found")))
 		return
 	}
 

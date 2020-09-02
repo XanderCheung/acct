@@ -19,9 +19,9 @@ func SetAcctRouter(router *gin.Engine) {
 			accounts.GET("/", fetchAccounts)
 			accounts.POST("/", createAccount)
 			accounts.GET("/:id", fetchAccount)
-			accounts.PUT("/:id", updateAccount)
 			accounts.POST("/:id", updateAccount)
 			accounts.DELETE("/:id", destroyAccount)
+			accounts.POST("/:id/password", updateAccountPassword)
 		}
 
 	}

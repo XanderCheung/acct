@@ -6,6 +6,7 @@ import (
 	"github.com/xandercheung/acct"
 	"github.com/xandercheung/acct/utils"
 	"github.com/xandercheung/ogs-go"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"strconv"
 )
@@ -68,15 +69,16 @@ func updateAccount(c *gin.Context) {
 		return
 	}
 
-	params, err := utils.RequestBodyParams(c)
-	if err != nil {
+	temp := tempAccount{}
+	if err = json.NewDecoder(c.Request.Body).Decode(&temp); err != nil {
 		JSON(c, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage("Invalid Request")))
 		return
 	}
 
-	if err = acct.DB.Debug().Model(&account).
-		Select(permittedAccountParams(params)).
-		Updates(params).Error; err != nil {
+	account.Email = temp.Email
+	account.Username = temp.Username
+
+	if err = account.Update(); err != nil {
 		JSON(c, ogs.RspBase(ogs.StatusUpdateFailed, ogs.ErrorMessage(err.Error())))
 	} else {
 		JSON(c, ogs.RspOK(ogs.SuccessMessage("Update Successfully")))
@@ -96,25 +98,45 @@ func destroyAccount(c *gin.Context) {
 	}
 }
 
-func permittedAccountParams(params map[string]interface{}) []string {
-	permitted := []string{"Email", "Username"}
-
-	if password, ok := params["password"].(string); ok && !utils.IsEmpty(password) {
-		permitted = append(permitted, "Password")
+func updateAccountPassword(c *gin.Context) {
+	account, err := loadAccount(c)
+	if err != nil {
+		return
 	}
 
-	return permitted
+	params, err := utils.RequestBodyParams(c)
+	if err != nil {
+		JSON(c, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage("Invalid Request")))
+		return
+	}
+
+	newPassword, _ := params["new_password"].(string)
+	oldPassword, _ := params["old_password"].(string)
+
+	if err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(oldPassword)); err != nil {
+		if err == bcrypt.ErrMismatchedHashAndPassword { // Password does not match!
+			errMsg := ogs.CodeText(ogs.StatusErrorPassword)
+			JSON(c, ogs.RspBase(ogs.StatusErrorPassword, ogs.ErrorMessage(errMsg)))
+			return
+		}
+
+		JSON(c, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage(err.Error())))
+		return
+	}
+
+	account.Password = newPassword
+	if err = account.UpdatePassword(); err != nil {
+		JSON(c, ogs.RspBase(ogs.StatusUpdateFailed, ogs.ErrorMessage(err.Error())))
+	} else {
+		JSON(c, ogs.RspOK(ogs.SuccessMessage("Update Password Successfully")))
+	}
 }
 
 func loadAccount(c *gin.Context) (account acct.Account, err error) {
 	id, _ := strconv.Atoi(c.Param("id"))
+	account = acct.FindAccountById(uint(id))
 
-	if err = acct.DB.Limit(1).Find(&account, id).Error; err != nil {
-		JSON(c, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage(err.Error())))
-		return account, err
-	}
-
-	if account.ID == 0 {
+	if !account.IsPersisted() {
 		JSON(c, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("Account Not Found")))
 		return account, gorm.ErrRecordNotFound
 	}

@@ -9,8 +9,10 @@ import (
 	"os"
 )
 
+// TokenKey the default token key
 var TokenKey = "6cf6813ba69b1e7cf4bedf4fe6d61221"
 
+// TokenAuthMiddleware middleware of token authentication
 func TokenAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if !isAuthorized(c) {
@@ -23,8 +25,8 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-// returns the bcrypt hash of the password at the given cost
-func passwordToBcryptHash(password string) (string, error) {
+// ToHashedPassword returns the bcrypt hash of the password at the given cost
+func ToHashedPassword(password string) (string, error) {
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
