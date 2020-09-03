@@ -1,23 +1,21 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/xandercheung/acct"
-	"github.com/xandercheung/acct/api"
-	"github.com/xandercheung/acct/utils"
+	"io"
+	"os"
 )
 
 func main() {
-	utils.InitEnv()
+	f, _ := os.OpenFile("log/acct-http.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	gin.DefaultWriter = io.MultiWriter(f)
 
-	connectArgs := acct.GetMysqlConnectArgsFromEnv()
-	err := acct.InitDBConnection(connectArgs)
-
-	if err != nil {
+	if err := acct.InitDBAndSettings(nil); err != nil {
 		panic(err)
 	}
 
-	acct.MigrateTables()
-	acct.DBSeed()
-
-	api.RunHttpServer()
+	if err := acct.RunHttpServer(); err != nil {
+		panic(err)
+	}
 }

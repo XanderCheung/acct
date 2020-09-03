@@ -39,7 +39,7 @@ func (c *Account) Create() error {
 		return err
 	}
 
-	hashedPassword, err := ToHashedPassword(c.Password)
+	hashedPassword, err := Utils.ToHashedPassword(c.Password)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func (c *Account) UpdatePassword() error {
 		return err
 	}
 
-	hashedPassword, err := ToHashedPassword(c.Password)
+	hashedPassword, err := Utils.ToHashedPassword(c.Password)
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func (c *Account) GenerateToken() error {
 		"exp":      time.Now().Add(time.Hour * 72).Unix(),
 	})
 
-	signedStr, err := token.SignedString([]byte(getTokenKey()))
+	signedStr, err := token.SignedString([]byte(getJwtTokenKey()))
 	if err != nil {
 		return err
 	}
@@ -102,4 +102,8 @@ func (c *Account) GenerateToken() error {
 	c.Token = signedStr
 
 	return nil
+}
+
+func (c *Account) IsPersisted() bool {
+	return c.ID > 0
 }

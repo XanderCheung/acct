@@ -2,19 +2,18 @@ package acct
 
 import (
 	"errors"
-	"github.com/xandercheung/acct/utils"
 )
 
 func (c *Account) validateEmail() error {
-	if utils.IsEmpty(c.Email) {
+	if Utils.IsEmpty(c.Email) {
 		return errors.New("email is required")
 	}
 
-	if !utils.IsValidEmail(c.Email) {
+	if !Utils.IsValidEmail(c.Email) {
 		return errors.New("email address is invalid")
 	}
 
-	if IsAccountWithDeletedExists(map[string]interface{}{"email": c.Email}, map[string]interface{}{"id": c.ID}) {
+	if Finder.IsAccountWithDeletedExists(map[string]interface{}{"email": c.Email}, map[string]interface{}{"id": c.ID}) {
 		return errors.New("email address already in use")
 	}
 
@@ -22,15 +21,15 @@ func (c *Account) validateEmail() error {
 }
 
 func (c *Account) validateUsername() error {
-	if utils.IsEmpty(c.Username) {
+	if Utils.IsEmpty(c.Username) {
 		return errors.New("username is required")
 	}
 
-	if !utils.IsValidUsername(c.Username) {
+	if !Utils.IsValidUsername(c.Username) {
 		return errors.New("username is invalid")
 	}
 
-	if IsAccountWithDeletedExists(map[string]interface{}{"username": c.Username}, map[string]interface{}{"id": c.ID}) {
+	if Finder.IsAccountWithDeletedExists(map[string]interface{}{"username": c.Username}, map[string]interface{}{"id": c.ID}) {
 		return errors.New("username already in use")
 	}
 
@@ -38,7 +37,7 @@ func (c *Account) validateUsername() error {
 }
 
 func (c *Account) validatePassword() error {
-	if utils.IsEmpty(c.Password) {
+	if Utils.IsEmpty(c.Password) {
 		return errors.New("password is required")
 	}
 

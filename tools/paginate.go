@@ -1,4 +1,4 @@
-package utils
+package tools
 
 import (
 	"github.com/gin-gonic/gin"
@@ -9,7 +9,8 @@ import (
 
 var defaultPerPage = 20
 
-func Paginate(db *gorm.DB, page, perPage int) (*gorm.DB, ogs.BasePaginate) {
+// Paginate paginate query
+func (t *Tool) Paginate(db *gorm.DB, page, perPage int) (*gorm.DB, ogs.BasePaginate) {
 	if page <= 0 {
 		page = 1
 	}
@@ -27,8 +28,9 @@ func Paginate(db *gorm.DB, page, perPage int) (*gorm.DB, ogs.BasePaginate) {
 	return db, ogs.NewPaginate(page, int(totalCount), perPage)
 }
 
-func PaginateGin(db *gorm.DB, c *gin.Context) (*gorm.DB, ogs.BasePaginate) {
-	page, _ := strconv.Atoi(c.Query("page"))
-	perPage, _ := strconv.Atoi(c.Query("per_page"))
-	return Paginate(db, page, perPage)
+// PaginateGin paginate query
+func (t *Tool) PaginateGin(db *gorm.DB, g *gin.Context) (*gorm.DB, ogs.BasePaginate) {
+	page, _ := strconv.Atoi(g.Query("page"))
+	perPage, _ := strconv.Atoi(g.Query("per_page"))
+	return t.Paginate(db, page, perPage)
 }
