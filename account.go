@@ -1,7 +1,7 @@
 package acct
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	"errors"
 	"gorm.io/gorm"
 	"sync"
 	"time"
@@ -15,6 +15,9 @@ type Account struct {
 	Email     string         `gorm:"type:varchar(100);uniqueIndex;not null" json:"email"`
 	Username  string         `gorm:"type:varchar(100);uniqueIndex;not null" json:"username"`
 	Password  string         `gorm:"column:encrypted_password;not null" json:"-"`
+	Nickname  string         `gorm:"type:varchar(100)" json:"nickname"`
+	Avatar    string         `gorm:"type:varchar(100)" json:"avatar"`
+	Status    AccountStatus  `gorm:"type:smallint;default:0" json:"status"`
 	Token     string         `gorm:"-" json:"token"`
 }
 
@@ -87,23 +90,32 @@ func (c *Account) UpdatePassword() error {
 	return DB.Model(&c).UpdateColumn("encrypted_password", hashedPassword).Error
 }
 
-// GenerateToken generate new token to field of "Token"
-func (c *Account) GenerateToken() error {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": c.Username,
-		"exp":      time.Now().Add(time.Hour * 72).Unix(),
-	})
-
-	signedStr, err := token.SignedString([]byte(getJwtTokenKey()))
-	if err != nil {
-		return err
+// Lock lock account, unable to login
+func (c *Account) Lock() error {
+	if c.Status.IsLocked() {
+		return errors.New("already locked")
 	}
 
-	c.Token = signedStr
-
-	return nil
+	return DB.Model(&c).UpdateColumn("status", AccountStatusLocked).Error
 }
 
+// UnLock unlock account
+func (c *Account) UnLock() error {
+	if c.Status.IsNormal() {
+		return errors.New("already unlocked")
+	}
+
+	return DB.Model(&c).UpdateColumn("status", AccountStatusNormal).Error
+}
+
+// GenerateToken generate new token to field of "Token"
+func (c *Account) GenerateToken() error {
+	token, err := generateTokenByAccountId(c.ID)
+	c.Token = token
+	return err
+}
+
+// IsPersisted return true if the record is persisted
 func (c *Account) IsPersisted() bool {
 	return c.ID > 0
 }

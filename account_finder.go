@@ -14,8 +14,18 @@ func (f *finder) IsAccountWithDeletedExists(query, notQuery map[string]interface
 
 // FindAccountById find account by id
 func (f *finder) FindAccountById(id uint) Account {
-	DB.Migrator()
 	account := Account{}
 	DB.Model(&Account{}).Limit(1).Find(&account, id)
 	return account
+}
+
+// FindAccountByToken find account by token
+func (f *finder) FindAccountByToken(tokenString string) Account {
+	id := f.FindAccountIdByToken(tokenString)
+	return f.FindAccountById(id)
+}
+
+// FindAccountIdByToken find account id by token
+func (f *finder) FindAccountIdByToken(tokenString string) uint {
+	return findAccountIdByToken(tokenString)
 }

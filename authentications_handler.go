@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xandercheung/ogs-go"
 	"golang.org/x/crypto/bcrypt"
+	"net/http"
 )
 
 type tempAccount struct {
@@ -26,6 +27,13 @@ func (c *handler) SignIn(g *gin.Context) {
 
 	if !account.IsPersisted() {
 		Utils.JSON(g, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("User Not Found")))
+		return
+	}
+
+	// check account status
+	if account.Status.IsLocked() {
+		response := ogs.RspBase(ogs.StatusUnauthorized, ogs.ErrorMessage("Account Status Is Abnormal"))
+		g.AbortWithStatusJSON(http.StatusOK, response)
 		return
 	}
 
