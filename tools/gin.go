@@ -15,3 +15,7 @@ func (t *Tool) RequestBodyParams(g *gin.Context) (params map[string]interface{},
 func (t *Tool) JSON(g *gin.Context, obj interface{}) {
 	g.JSON(http.StatusOK, obj)
 }
+
+func (t *Tool) HeaderToken(g *gin.Context) string {
+	return g.GetHeader("Authorization")
+}

@@ -23,5 +23,7 @@ func SetRouter(router *gin.Engine) {
 			accounts.DELETE("/:id", Handler.DestroyAccount)
 			accounts.POST("/:id/password", Handler.UpdateAccountPassword)
 		}
+
+		r.GET("/account/info", Handler.FetchCurrentAccountInfo)
 	}
 }

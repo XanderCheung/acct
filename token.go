@@ -17,7 +17,7 @@ type TokenClaims struct {
 // TokenAuthMiddleware middleware of token authentication
 func TokenAuthMiddleware() gin.HandlerFunc {
 	return func(g *gin.Context) {
-		tokenStr := g.GetHeader("Authorization")
+		tokenStr := Utils.HeaderToken(g)
 
 		if !isTokenAuthorized(tokenStr) {
 			response := ogs.RspBase(ogs.StatusInvalidToken, ogs.ErrorMessage("Invalid Token"))

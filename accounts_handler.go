@@ -39,6 +39,17 @@ func (c *handler) FetchAccount(g *gin.Context) {
 	Utils.JSON(g, ogs.RspOKWithData(ogs.BlankMessage(), account))
 }
 
+func (c *handler) FetchCurrentAccountInfo(g *gin.Context) {
+	headerToken := Utils.HeaderToken(g)
+	account := Finder.FindAccountByToken(headerToken)
+	if !account.IsPersisted() {
+		Utils.JSON(g, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("Get Current Account Info Failed")))
+		return
+	}
+
+	Utils.JSON(g, ogs.RspOKWithData(ogs.BlankMessage(), account))
+}
+
 func (c *handler) CreateAccount(g *gin.Context) {
 	temp := tempAccount{}
 	if err := json.NewDecoder(g.Request.Body).Decode(&temp); err != nil {
