@@ -20,10 +20,10 @@ func InitDBAndSettings(config *Config) error {
 			return err
 		}
 
-		config.ConnectionDSN = getMysqlConnectArgsFromEnv()
+		config.ConnectionDSN = GetMysqlConnectArgsFromEnv()
 	}
 
-	if err := connectDB(config.ConnectionDSN); err != nil {
+	if err := ConnectDB(config.ConnectionDSN); err != nil {
 		return err
 	}
 
@@ -43,12 +43,13 @@ func InitDBAndSettings(config *Config) error {
 // ConnectDB initialize a new db connection, need to import driver first, e.g:
 // ConnectDB("user:password@tcp(host:port)/dbname?&charset=utf8mb4&parseTime=True&loc=UTC")
 // refer https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
-func connectDB(dsn string) (err error) {
+func ConnectDB(dsn string) (err error) {
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	return err
 }
 
-func getMysqlConnectArgsFromEnv() string {
+// GetMysqlConnectArgsFromEnv return mysql connection dsn
+func GetMysqlConnectArgsFromEnv() string {
 	host := os.Getenv("MYSQL_HOST")
 	port := os.Getenv("MYSQL_PORT")
 	user := os.Getenv("MYSQL_USER")
