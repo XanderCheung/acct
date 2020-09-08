@@ -4,12 +4,13 @@ Service interface for user authentication
 ```shell script
 [GIN-debug] POST   /api/v1/sign_in           --> github.com/xandercheung/acct.(*handler).SignIn-fm (3 handlers)
 [GIN-debug] POST   /api/v1/sign_up           --> github.com/xandercheung/acct.(*handler).SignUp-fm (3 handlers)
-[GIN-debug] GET    /api/v1/accounts/         --> github.com/xandercheung/acct.(*handler).FetchAccounts-fm (4 handlers)
-[GIN-debug] POST   /api/v1/accounts/         --> github.com/xandercheung/acct.(*handler).CreateAccount-fm (4 handlers)
+[GIN-debug] GET    /api/v1/accounts          --> github.com/xandercheung/acct.(*handler).FetchAccounts-fm (4 handlers)
+[GIN-debug] POST   /api/v1/accounts          --> github.com/xandercheung/acct.(*handler).CreateAccount-fm (4 handlers)
 [GIN-debug] GET    /api/v1/accounts/:id      --> github.com/xandercheung/acct.(*handler).FetchAccount-fm (4 handlers)
 [GIN-debug] POST   /api/v1/accounts/:id      --> github.com/xandercheung/acct.(*handler).UpdateAccount-fm (4 handlers)
 [GIN-debug] DELETE /api/v1/accounts/:id      --> github.com/xandercheung/acct.(*handler).DestroyAccount-fm (4 handlers)
 [GIN-debug] POST   /api/v1/accounts/:id/password --> github.com/xandercheung/acct.(*handler).UpdateAccountPassword-fm (4 handlers)
+[GIN-debug] GET    /api/v1/account/info      --> github.com/xandercheung/acct.(*handler).FetchCurrentAccountInfo-fm (4 handlers)
 [GIN-debug] Listening and serving HTTP on :2337
 ```
 

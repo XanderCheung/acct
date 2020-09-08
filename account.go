@@ -18,7 +18,7 @@ type Account struct {
 	Nickname  string         `gorm:"type:varchar(100)" json:"nickname"`
 	Avatar    string         `gorm:"type:varchar(100)" json:"avatar"`
 	Status    AccountStatus  `gorm:"type:smallint;default:0" json:"status"`
-	Token     string         `gorm:"-" json:"token"`
+	Token     string         `gorm:"-" json:"token,omitempty"`
 }
 
 var accountLock = sync.RWMutex{}
@@ -69,6 +69,8 @@ func (c *Account) Update() error {
 	updateParams := Account{
 		Email:    c.Email,
 		Username: c.Username,
+		Nickname: c.Nickname,
+		Avatar:   c.Avatar,
 	}
 
 	return DB.Model(&c).Updates(updateParams).Error

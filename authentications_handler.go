@@ -12,6 +12,8 @@ type tempAccount struct {
 	Email    string `json:"email"`
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Nickname string `json:"nickname"`
+	Avatar   string `json:"avatar"`
 }
 
 func (c *handler) SignIn(g *gin.Context) {

@@ -61,6 +61,8 @@ func (c *handler) CreateAccount(g *gin.Context) {
 		Email:    temp.Email,
 		Username: temp.Username,
 		Password: temp.Password,
+		Nickname: temp.Nickname,
+		Avatar:   temp.Avatar,
 	}
 
 	err := account.Create()
@@ -86,6 +88,8 @@ func (c *handler) UpdateAccount(g *gin.Context) {
 
 	account.Email = temp.Email
 	account.Username = temp.Username
+	account.Nickname = temp.Nickname
+	account.Avatar = temp.Avatar
 
 	if err = account.Update(); err != nil {
 		Utils.JSON(g, ogs.RspBase(ogs.StatusUpdateFailed, ogs.ErrorMessage(err.Error())))
