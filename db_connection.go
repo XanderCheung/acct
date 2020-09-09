@@ -23,6 +23,8 @@ func InitDBAndSettings(config *Config) error {
 		config.ConnectionDSN = GetMysqlConnectArgsFromEnv()
 	}
 
+	config.Load()
+
 	if err := ConnectDB(config.ConnectionDSN); err != nil {
 		return err
 	}
@@ -34,8 +36,6 @@ func InitDBAndSettings(config *Config) error {
 	if err := migrateSeeds(); err != nil {
 		return err
 	}
-
-	config.load()
 
 	return nil
 }
@@ -55,6 +55,7 @@ func GetMysqlConnectArgsFromEnv() string {
 	user := os.Getenv("MYSQL_USER")
 	database := os.Getenv("MYSQL_DATABASE")
 	password := os.Getenv("MYSQL_PASSWORD")
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?&charset=utf8mb4&parseTime=True&loc=UTC",
-		user, password, host, port, database)
+	loc := os.Getenv("MYSQL_LOCATION")
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?&charset=utf8mb4&parseTime=True&loc=%s",
+		user, password, host, port, database, loc)
 }

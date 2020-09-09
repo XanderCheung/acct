@@ -1,6 +1,8 @@
 package acct
 
-import "os"
+import (
+	"os"
+)
 
 type Config struct {
 	IsLoadDSNFromENV bool
@@ -12,8 +14,8 @@ type Config struct {
 	HttpServerPort string
 }
 
-var jwtTokenKey = ""
-var httpServerPort = ""
+var JwtTokenKey = ""
+var HttpServerPort = "2337"
 
 // DefaultConfig default config of acct
 var DefaultConfig = &Config{
@@ -24,11 +26,11 @@ var DefaultConfig = &Config{
 	HttpServerPort:           "2337",
 }
 
-func (c *Config) load() {
+func (c *Config) Load() {
 	if c.IsLoadJwtTokenKeyFromENV {
-		jwtTokenKey = os.Getenv("JWT_TOKEN_KEY")
+		JwtTokenKey = os.Getenv("JWT_TOKEN_KEY")
 	} else {
-		jwtTokenKey = c.JwtTokenKey
+		JwtTokenKey = c.JwtTokenKey
 	}
-	httpServerPort = c.HttpServerPort
+	HttpServerPort = c.HttpServerPort
 }

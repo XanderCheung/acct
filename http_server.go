@@ -16,5 +16,5 @@ func RunHttpServer() error {
 	router := gin.Default()
 	SetRouter(router)
 
-	return router.Run(":" + httpServerPort)
+	return router.Run(":" + HttpServerPort)
 }

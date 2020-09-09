@@ -52,7 +52,7 @@ func isTokenAuthorized(tokenStr string) bool {
 }
 
 func getJwtTokenKey() string {
-	return jwtTokenKey
+	return JwtTokenKey
 }
 
 func tokenSecretKeyFunc() jwt.Keyfunc {
