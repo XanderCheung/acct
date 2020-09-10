@@ -18,8 +18,10 @@ type tempAccount struct {
 
 func (c *handler) SignIn(g *gin.Context) {
 	temp := tempAccount{}
-	if err := json.NewDecoder(g.Request.Body).Decode(&temp); err != nil || Utils.IsEmpty(temp.Email) && Utils.IsEmpty(temp.Username) {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage("Invalid Request")))
+	if err := json.NewDecoder(g.Request.Body).Decode(&temp); err != nil ||
+		Utils.IsEmpty(temp.Email) && Utils.IsEmpty(temp.Username) {
+
+		Utils.JSON(g, ogs.RspError(ogs.StatusBadParams, "Bad Params"))
 		return
 	}
 
@@ -28,13 +30,13 @@ func (c *handler) SignIn(g *gin.Context) {
 	DB.Where(&Account{Email: temp.Email, Username: temp.Username}).Limit(1).Find(&account)
 
 	if !account.IsPersisted() {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("User Not Found")))
+		Utils.JSON(g, ogs.RspError(ogs.StatusUserNotFound, "User Not Found"))
 		return
 	}
 
 	// check account status
 	if account.Status.IsLocked() {
-		response := ogs.RspBase(ogs.StatusUnauthorized, ogs.ErrorMessage("Account Status Is Abnormal"))
+		response := ogs.RspError(ogs.StatusUnauthorized, "Account Status Is Abnormal")
 		g.AbortWithStatusJSON(http.StatusOK, response)
 		return
 	}
@@ -43,27 +45,27 @@ func (c *handler) SignIn(g *gin.Context) {
 	if err := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(temp.Password)); err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword { // Password does not match!
 			errMsg := ogs.CodeText(ogs.StatusErrorPassword)
-			Utils.JSON(g, ogs.RspBase(ogs.StatusErrorPassword, ogs.ErrorMessage(errMsg)))
+			Utils.JSON(g, ogs.RspError(ogs.StatusErrorPassword, errMsg))
 			return
 		}
 
-		Utils.JSON(g, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage(err.Error())))
+		Utils.JSON(g, ogs.RspError(ogs.StatusSystemError, err.Error()))
 		return
 	}
 
 	// Generate token
 	if err := account.GenerateToken(); err != nil {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage("Sign In Failed")))
+		Utils.JSON(g, ogs.RspError(ogs.StatusSystemError, "Sign In Failed"))
 		return
 	}
 
-	Utils.JSON(g, ogs.RspOKWithData(ogs.SuccessMessage("Signed In"), account))
+	Utils.JSON(g, ogs.RspOKWithData("Signed In", account))
 }
 
 func (c *handler) SignUp(g *gin.Context) {
 	temp := tempAccount{}
 	if err := json.NewDecoder(g.Request.Body).Decode(&temp); err != nil {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage("Invalid Request")))
+		Utils.JSON(g, ogs.RspError(ogs.StatusBadParams, "Bad Params"))
 		return
 	}
 
@@ -74,9 +76,9 @@ func (c *handler) SignUp(g *gin.Context) {
 	}
 
 	if err := account.Create(); err != nil {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage(err.Error())))
+		Utils.JSON(g, ogs.RspError(ogs.StatusSignUpFailed, err.Error()))
 		return
 	}
 
-	Utils.JSON(g, ogs.RspOKWithData(ogs.SuccessMessage("Registered Successfully"), account))
+	Utils.JSON(g, ogs.RspOKWithData("Registered Successfully", account))
 }

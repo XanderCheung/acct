@@ -27,7 +27,7 @@ func (c *handler) FetchAccounts(g *gin.Context) {
 	relation, paginate := Utils.PaginateGin(relation, g)
 	relation.Find(&accounts)
 
-	Utils.JSON(g, ogs.RspOKWithPaginate(ogs.BlankMessage(), accounts, paginate))
+	Utils.JSON(g, ogs.RspOKWithPaginate("", accounts, paginate))
 }
 
 func (c *handler) FetchAccount(g *gin.Context) {
@@ -36,24 +36,24 @@ func (c *handler) FetchAccount(g *gin.Context) {
 		return
 	}
 
-	Utils.JSON(g, ogs.RspOKWithData(ogs.BlankMessage(), account))
+	Utils.JSON(g, ogs.RspOKWithData("", account))
 }
 
 func (c *handler) FetchCurrentAccountInfo(g *gin.Context) {
 	headerToken := Utils.HeaderToken(g)
 	account := Finder.FindAccountByToken(headerToken)
 	if !account.IsPersisted() {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("Get Current Account Info Failed")))
+		Utils.JSON(g, ogs.RspError(ogs.StatusUserNotFound, "Get Current Account Info Failed"))
 		return
 	}
 
-	Utils.JSON(g, ogs.RspOKWithData(ogs.BlankMessage(), account))
+	Utils.JSON(g, ogs.RspOKWithData("", account))
 }
 
 func (c *handler) CreateAccount(g *gin.Context) {
 	temp := tempAccount{}
 	if err := json.NewDecoder(g.Request.Body).Decode(&temp); err != nil {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage("Invalid Request")))
+		Utils.JSON(g, ogs.RspError(ogs.StatusSystemError, "Invalid Request"))
 		return
 	}
 
@@ -67,11 +67,11 @@ func (c *handler) CreateAccount(g *gin.Context) {
 
 	err := account.Create()
 	if err != nil {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusCreateFailed, ogs.ErrorMessage(err.Error())))
+		Utils.JSON(g, ogs.RspError(ogs.StatusCreateFailed, err.Error()))
 		return
 	}
 
-	Utils.JSON(g, ogs.RspOKWithData(ogs.SuccessMessage("Create Successfully"), account))
+	Utils.JSON(g, ogs.RspOKWithData("Create Successfully", account))
 }
 
 func (c *handler) UpdateAccount(g *gin.Context) {
@@ -82,7 +82,7 @@ func (c *handler) UpdateAccount(g *gin.Context) {
 
 	temp := tempAccount{}
 	if err = json.NewDecoder(g.Request.Body).Decode(&temp); err != nil {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage("Invalid Request")))
+		Utils.JSON(g, ogs.RspError(ogs.StatusBadParams, "Bad Params"))
 		return
 	}
 
@@ -92,9 +92,9 @@ func (c *handler) UpdateAccount(g *gin.Context) {
 	account.Avatar = temp.Avatar
 
 	if err = account.Update(); err != nil {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusUpdateFailed, ogs.ErrorMessage(err.Error())))
+		Utils.JSON(g, ogs.RspError(ogs.StatusUpdateFailed, err.Error()))
 	} else {
-		Utils.JSON(g, ogs.RspOK(ogs.SuccessMessage("Update Successfully")))
+		Utils.JSON(g, ogs.RspOK("Update Successfully"))
 	}
 }
 
@@ -105,9 +105,9 @@ func (c *handler) DestroyAccount(g *gin.Context) {
 	}
 
 	if err = DB.Delete(&account).Error; err != nil {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusDestroyFailed, ogs.ErrorMessage("Destroy Failed")))
+		Utils.JSON(g, ogs.RspError(ogs.StatusDestroyFailed, "Destroy Failed"))
 	} else {
-		Utils.JSON(g, ogs.RspOK(ogs.SuccessMessage("Destroy Successfully")))
+		Utils.JSON(g, ogs.RspOK("Destroy Successfully"))
 	}
 }
 
@@ -119,7 +119,7 @@ func (c *handler) UpdateAccountPassword(g *gin.Context) {
 
 	params, err := Utils.RequestBodyParams(g)
 	if err != nil {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage("Invalid Request")))
+		Utils.JSON(g, ogs.RspError(ogs.StatusBadParams, "Bad Params"))
 		return
 	}
 
@@ -129,19 +129,19 @@ func (c *handler) UpdateAccountPassword(g *gin.Context) {
 	if err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(oldPassword)); err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword { // Password does not match!
 			errMsg := ogs.CodeText(ogs.StatusErrorPassword)
-			Utils.JSON(g, ogs.RspBase(ogs.StatusErrorPassword, ogs.ErrorMessage(errMsg)))
+			Utils.JSON(g, ogs.RspError(ogs.StatusErrorPassword, errMsg))
 			return
 		}
 
-		Utils.JSON(g, ogs.RspBase(ogs.StatusSystemError, ogs.ErrorMessage(err.Error())))
+		Utils.JSON(g, ogs.RspError(ogs.StatusSystemError, err.Error()))
 		return
 	}
 
 	account.Password = newPassword
 	if err = account.UpdatePassword(); err != nil {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusUpdateFailed, ogs.ErrorMessage(err.Error())))
+		Utils.JSON(g, ogs.RspError(ogs.StatusUpdateFailed, err.Error()))
 	} else {
-		Utils.JSON(g, ogs.RspOK(ogs.SuccessMessage("Update Password Successfully")))
+		Utils.JSON(g, ogs.RspOK("Update Password Successfully"))
 	}
 }
 
@@ -150,7 +150,7 @@ func (c *handler) loadAccount(g *gin.Context) (account Account, err error) {
 	account = Finder.FindAccountById(uint(id))
 
 	if !account.IsPersisted() {
-		Utils.JSON(g, ogs.RspBase(ogs.StatusUserNotFound, ogs.ErrorMessage("Account Not Found")))
+		Utils.JSON(g, ogs.RspError(ogs.StatusUserNotFound, "Account Not Found"))
 		return account, gorm.ErrRecordNotFound
 	}
 

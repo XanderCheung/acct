@@ -20,7 +20,7 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		tokenStr := Utils.HeaderToken(g)
 
 		if !isTokenAuthorized(tokenStr) {
-			response := ogs.RspBase(ogs.StatusInvalidToken, ogs.ErrorMessage("Invalid Token"))
+			response := ogs.RspError(ogs.StatusInvalidToken, "Invalid Token")
 			g.AbortWithStatusJSON(http.StatusOK, response)
 			return
 		}
@@ -28,7 +28,7 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		// check account status
 		account := Finder.FindAccountByToken(tokenStr)
 		if !account.IsPersisted() || account.Status.IsLocked() {
-			response := ogs.RspBase(ogs.StatusUnauthorized, ogs.ErrorMessage("Account Status Is Abnormal"))
+			response := ogs.RspError(ogs.StatusUnauthorized, "Account Status Is Abnormal")
 			g.AbortWithStatusJSON(http.StatusOK, response)
 			return
 		}
