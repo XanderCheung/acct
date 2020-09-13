@@ -9,8 +9,8 @@ import (
 type AccountStatus int
 
 const (
-	AccountStatusNormal = iota // normal
-	AccountStatusLocked        // locked
+	AccountStatusNormal AccountStatus = iota // normal
+	AccountStatusLocked                      // locked
 )
 
 func (c AccountStatus) IsNormal() bool {
