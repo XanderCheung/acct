@@ -29,11 +29,11 @@ func InitDBAndSettings(config *Config) error {
 		return err
 	}
 
-	if err := migrateTables(); err != nil {
+	if err := MigrateTables(); err != nil {
 		return err
 	}
 
-	if err := migrateSeeds(); err != nil {
+	if err := MigrateSeeds(); err != nil {
 		return err
 	}
 

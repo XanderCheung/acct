@@ -16,7 +16,7 @@ type Account struct {
 	Username  string         `gorm:"type:varchar(100);uniqueIndex;not null" json:"username"`
 	Password  string         `gorm:"column:encrypted_password;not null" json:"-"`
 	Nickname  string         `gorm:"type:varchar(100)" json:"nickname"`
-	Avatar    string         `gorm:"type:varchar(100)" json:"avatar"`
+	Avatar    string         `json:"avatar"`
 	Status    AccountStatus  `gorm:"type:smallint;default:0" json:"status"`
 	Token     string         `gorm:"-" json:"token,omitempty"`
 }
