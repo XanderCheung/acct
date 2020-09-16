@@ -9,7 +9,7 @@ CREATE TABLE `accounts`
     `encrypted_password` longtext        NOT NULL,
     `nickname`           varchar(100) DEFAULT NULL,
     `avatar`             longtext,
-    `status`             smallint     DEFAULT '0',
+    `status`             tinyint(1)   DEFAULT '0',
     PRIMARY KEY (`id`),
     UNIQUE KEY `idx_accounts_email` (`email`),
     UNIQUE KEY `idx_accounts_username` (`username`)

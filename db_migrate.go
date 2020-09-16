@@ -24,7 +24,7 @@ func MigrateTables() error {
 		return err
 	}
 
-	_ = m.Steps(1)
+	_ = m.Steps(5)
 	return nil
 }
 
